@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Docker Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;color:white;background:radial-gradient(ellipse at center,#168c59,#003e2b);overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;left:-10%;width:120%;height:130px;background:#00b86b55;border-radius:50%;z-index:-1;animation:wave 6s ease-in-out infinite alternate}
+body:before{top:-75px}body:after{bottom:-75px;animation-delay:-3s;background:#20c77a55}
+@keyframes wave{to{transform:translateX(7%) translateY(25px) scaleY(1.4)}}
+.glow{position:fixed;width:250px;height:250px;border-radius:50%;background:#00ff9955;filter:blur(90px);z-index:-1;animation:light 6s infinite alternate}
+.glow.one{top:15%;left:10%}.glow.two{bottom:10%;right:5%;animation-delay:3s}
+@keyframes light{to{opacity:.15;transform:scale(1.6)}}
+.orb{position:fixed;width:18px;height:18px;border:1px solid #70ffc0;border-radius:50%;box-shadow:0 0 15px #00ff9d;animation:float 7s infinite alternate;z-index:-1}
+.o1{top:20%;left:12%}.o2{top:42%;right:12%;animation-delay:2s}.o3{bottom:25%;left:35%;animation-delay:4s}
+.star{position:fixed;color:#8affc2;text-shadow:0 0 12px #00ff9d;animation:twinkle 2s infinite alternate;z-index:-1}
+.s1{top:30%;left:75%}.s2{top:65%;left:15%;animation-delay:1s}.s3{bottom:15%;right:20%;animation-delay:2s}
+@keyframes float{to{transform:translate(30px,-35px) rotate(90deg)}}
+@keyframes twinkle{to{opacity:.15;transform:scale(.4)}}
+.container{max-width:950px;margin:auto;padding:25px 17px}
+header{text-align:center;padding:25px}
+h1,h2{color:#eafff3}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.card{background:linear-gradient(135deg,#ffffff35,#00523855);border:1px solid #ffffff65;border-radius:25px;padding:23px;margin-bottom:18px;backdrop-filter:blur(15px);box-shadow:0 8px 30px #002c2070;position:relative;overflow:hidden;animation:shine 6s infinite alternate}
+@keyframes shine{to{box-shadow:0 8px 35px #00ff8866,inset 0 0 25px #ffffff18}}
+input{width:100%;padding:14px;margin:6px 0;border:1px solid #79eab1;border-radius:12px;background:#ffffff20;color:white;font-size:16px}
+input::placeholder{color:#d4f6e3}
+button{padding:12px 20px;border:0;border-radius:12px;background:#65e5a5;color:#003d29;font-weight:bold;cursor:pointer;margin:5px}
+.item{padding:12px;margin:9px 0;background:#ffffff18;border-radius:12px}
+footer{text-align:center;padding:25px;background:#ffffff15}
+</style>
+</head>
+<body>
+<div class="glow one"></div><div class="glow two"></div>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+<div class="star s1">✦</div><div class="star s2">✧</div><div class="star s3">✦</div>
+<div class="container">
+<header><h1>DOCKER DASHBOARD</h1><h2>Application Dashboard</h2><p>Containerized Application Deployment & Management</p><p>🟢 Running Successfully</p></header>
+<div class="grid">
+<div class="card"><h2>◉ Application Status</h2><p>Flask: Running Successfully</p></div>
+<div class="card"><h2>▣ Container Information</h2><p>Docker Project App</p><p>Port: 5000</p></div>
+<div class="card"><h2>☁ Cloud Deployment</h2><p>AWS EC2</p><p>Ubuntu Server</p></div>
+<div class="card"><h2>⌘ Project Information</h2><p>Python Flask Application</p><p>PostgreSQL Database</p></div>
+<div class="card"><h2>Technologies Used</h2><p>Python　Flask　Docker</p><p>PostgreSQL　AWS EC2</p><p>HTML & CSS</p></div>
+</div>
+<div class="card"><h2>♟ Visitor Management</h2>
+<input id="name" placeholder="Enter visitor name">
+<input id="purpose" placeholder="Purpose of visit">
+<button onclick="saveVisitor()">Save Visitor</button>
+</div>
+<div class="grid">
+<div class="card"><h2>Visitor Dashboard</h2><p>Total Visitors: <b id="total">0</b></p><p>Today's Visitors: <b id="today">0</b></p></div>
+<div class="card"><h2>Visitor History</h2><input id="search" placeholder="Search visitor" oninput="loadVisitors()"><div id="history"></div></div>
+</div>
+</div>
+<footer><div class="wave"></div>DOCKER PROJECT © 2026</footer>
+<script>
+const $=id=>document.getElementById(id);
+async function loadStats(){let d=await(await fetch('/stats')).json();$('total').textContent=d.total_visitors;$('today').textContent=d.today_visitors}
+async function loadVisitors(){let r=await fetch('/visitors?search='+encodeURIComponent($('search').value)),data=await r.json(),box=$('history');box.innerHTML='';data.forEach(v=>{let div=document.createElement('div');div.className='item';let p=document.createElement('p');p.textContent=v.id+' - '+v.name+' | '+v.purpose+' | In: '+(v.check_in||'Pending')+' | Out: '+(v.check_out||'Pending');div.append(p);if(!v.check_in||!v.check_out){let b=document.createElement('button'),a=v.check_in?'check-out':'check-in';b.textContent=v.check_in?'Check Out':'Check In';b.onclick=()=>visitorAction(v.id,a);div.append(b)}box.append(div)})}
+async function saveVisitor(){let name=$('name').value.trim(),purpose=$('purpose').value.trim();if(!name||!purpose)return alert('Enter name and purpose');let r=await fetch('/visitors',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,purpose})}),d=await r.json();if(!r.ok)return alert(d.error);alert('Visitor saved');$('name').value='';$('purpose').value='';loadVisitors();loadStats()}
+async function visitorAction(id,a){let r=await fetch('/visitors/'+id+'/'+a,{method:'POST'}),d=await r.json();if(!r.ok)return alert(d.error);loadVisitors();loadStats()}
+loadVisitors();loadStats();
+</script>
+</body>
+</html>
