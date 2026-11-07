@@ -52,7 +52,7 @@ Docker Project/
 
 1. Open the project folder in VS Code.
 2. Make sure Docker Desktop is running.
-3. Configure the database environment variables in the `.env` file.
+3. Create a .env file using the .env.example file as a reference, and configure your database environment variables.
 4. Open the terminal in the project folder.
 5. Run:
 
